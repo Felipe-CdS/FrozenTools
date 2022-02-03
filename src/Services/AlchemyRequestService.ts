@@ -1,6 +1,8 @@
+import { getCustomRepository } from "typeorm";
 import Web3 from "web3";
 import { AbiItem, hexToNumberString, fromWei, toHex } from "web3-utils";
 import { abi_ } from "../Abi/abi";
+import { OpenseaTxnRepositories } from "../Repositories/OpenseaTxnRepositories";
 
 interface ITxnData {
     timestamp: string;
@@ -59,9 +61,33 @@ class AlchemyRequestService {
         return {"Total:": hashArray.length, dataArray};
     }
 
-    async execute(contractAddress: string, blockNumber: string){        
+    async execute(contractAddress: string, blockNumber: string){  
+        const openseaTxnRepository = getCustomRepository(OpenseaTxnRepositories);
+
         const apiString = process.env.ALCHEMY_API_STRING;
+
+        console.log("Requests API start");
+
         const response = await this.web3SingleBlockReq(apiString, contractAddress, blockNumber);
+
+        console.log("Requests API Ended... Starting to save");
+
+        for(let i = 0; i < response.dataArray.length; i++){
+            let txnData = response.dataArray[i];
+
+            const txn = openseaTxnRepository.create({
+                txn_timestamp: txnData.timestamp,
+                block_number: txnData.blockNumber,
+                txn_hash: txnData.hash,
+                token_address: txnData.tokenAddress,
+                token_id: txnData.tokenId,
+                value: txnData.value    
+            });
+
+            await openseaTxnRepository.save(txn);
+        }   
+
+        console.log("done!");
         return response;
     }
 }

@@ -15,7 +15,7 @@ class AlchemyRequestController {
        
         const data = await alchemyRequestService.execute(contractAddress, blockNumber);
 
-        return res.status(200).json({});
+        return res.status(200).json({data});
     }
 }
 

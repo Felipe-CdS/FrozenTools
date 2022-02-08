@@ -1,4 +1,6 @@
-import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import {MigrationInterface, QueryRunner, Table, getConnection} from "typeorm";
+import { OpenseaTxn } from "../../Entities/OpenseaTxn";
+import { v4 as uuid } from "uuid";
 
 export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
 
@@ -18,7 +20,7 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                     },
                     {
                         name: "block_number",
-                        type: "varchar"
+                        type: "bigint"
                     },
                     {
                         name: "txn_hash",
@@ -39,6 +41,20 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                 ]
             })
         )
+        
+        await getConnection().createQueryBuilder().insert().into(OpenseaTxn).values(
+            [
+                {  
+                    id: uuid(),
+                    txn_timestamp: "",
+                    block_number: 5774644,
+                    txn_hash: "",
+                    token_address: "",
+                    token_id: "",
+                    value: ""
+                }
+            ]
+        ).execute();
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

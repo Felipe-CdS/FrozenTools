@@ -11,7 +11,7 @@ class OpenseaTxn {
     txn_timestamp: string;
 
     @Column()
-    block_number: string;
+    block_number: number;
 
     @Column()
     txn_hash: string;

@@ -1,3 +1,5 @@
 import { createConnection } from "typeorm";
 
-createConnection();
+const dbConnection = async() => {
+    await createConnection();
+}

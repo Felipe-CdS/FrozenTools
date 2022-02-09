@@ -28,9 +28,7 @@ app.use(
     });
 });
 
-
 app.listen(3000, () => { console.log("Server Up!") });
-
 
 /*
 TESTING
@@ -39,12 +37,12 @@ const updateBlockRoutine = new UpdateBlockRoutine();
 
 const updateDBToOnChainInfo = async() => {
     var lastBlockOnChain = await updateBlockRoutine.getLastBlockOnChain();
-    var lastBlockOnDB = await updateBlockRoutine.getLastBlockOnDB() + 1;
+    var lastBlockOnDB = 14135713 //await updateBlockRoutine.getLastBlockOnDB() + 1;
 
     while(lastBlockOnDB != lastBlockOnChain){
         let timer = Date.now();
         console.log(`> ${lastBlockOnDB} started...`);
-        await updateBlockRoutine.getNextBlockDataFromOpenSea(lastBlockOnDB);
+        await updateBlockRoutine.getSingleBlockDataFromOpenSea(lastBlockOnDB);
         console.log(`> ${lastBlockOnDB} finished in ${(Date.now() - timer)/1000} seconds`);
 
         var lastBlockOnChain = await updateBlockRoutine.getLastBlockOnChain();

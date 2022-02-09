@@ -1,16 +1,24 @@
 import { getCustomRepository } from "typeorm";
 import { OpenseaTxnRepositories } from "./Repositories/OpenseaTxnRepositories";
+import { OtherTxnRepositories } from "./Repositories/OtherTxnRepositories";
 import { AbiItem, fromWei, toHex, sha3, hexToNumber } from "web3-utils";
 import { abi_ } from "./Abi/abi";
 import Web3 from "web3"
+import { Contract } from "web3-eth-contract"
+
 
 interface ITxnData {
-    timestamp: string;
-    blockNumber: number;
-    hash: string;
-    tokenAddress: string;    
-    tokenId: string;
-    value: number;    
+    txn_timestamp: string;
+    block_number: number;
+    txn_hash: string;
+    token_address: string;    
+    token_id: string;
+    value: number;
+}
+
+interface IOtherTxnData {
+    txn_hash: string;
+    token_address: null;
 }
 
 class UpdateBlockRoutine {
@@ -18,70 +26,35 @@ class UpdateBlockRoutine {
     apiString: string;
     contractAddress: string;
     openseaTxnRepository: OpenseaTxnRepositories;
+    otherTxnRepository: OtherTxnRepositories;
     web3: Web3;
+    contract: Contract;
 
     constructor(){
         this.apiString = process.env.ALCHEMY_API_STRING;
         this.contractAddress = "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b";
         this.openseaTxnRepository = getCustomRepository(OpenseaTxnRepositories);
+        this.otherTxnRepository = getCustomRepository(OtherTxnRepositories);
         this.web3 = new Web3(Web3.givenProvider || this.apiString);
+        this.contract = new this.web3.eth.Contract(abi_ as AbiItem[], this.contractAddress);
     }
 
-    async getLastBlockOnChain(): Promise<number> {
-        const apiString = process.env.ALCHEMY_API_STRING;
-        const web3 = new Web3(Web3.givenProvider || apiString);
-        const blockNumber = await web3.eth.getBlockNumber();    
-        return blockNumber;
-    }
+    async getSingleBlockDataFromOpenSea(blockNumber: number) {
+        const singleBlockData = await this.contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": blockNumber });   
 
-    async getLastBlockOnDB(): Promise<number> { 
-        const { block_number } = await this.openseaTxnRepository.findOne({ order: { block_number: "DESC" } });
-        console.log(block_number);
-        return block_number;
-    }
-
-    async getNextBlockDataFromOpenSea(block_number : number) {
-        const response = await this.getSingleBlockData(block_number);
-            
-        for(let i = 0; i < response.dataArray.length; i++){
-            let txnData = response.dataArray[i];
-
-            const txn = this.openseaTxnRepository.create({
-                txn_timestamp: txnData.timestamp,
-                block_number: txnData.blockNumber,
-                txn_hash: txnData.hash,
-                token_address: txnData.tokenAddress,
-                token_id: txnData.tokenId,
-                value: txnData.value    
-            });
-        
-            await this.openseaTxnRepository.save(txn);
-        }
-
-        console.log(`> ${block_number} saved!`);
-    }
-
-    async getSingleBlockData(blockNumber: number) {
-
-        const contract = new this.web3.eth.Contract(abi_ as AbiItem[], this.contractAddress);
-
-        const response = await contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": blockNumber });
-        
-        const hashArray = response.map(obj => { return obj.transactionHash });
-
-        const dataArray = [];
+        const hashArray = singleBlockData.map(obj => { return obj.transactionHash });
 
         for(let i = 0; i < hashArray.length; ++i){
-            try{
-                let txn = await this.getSingleTxnData(hashArray[i]);
-                dataArray.push(txn as ITxnData);
+            let txn = await this.getSingleTxnData(hashArray[i]);
+
+            if(txn.token_address != null){
+                this.saveOpenSeaTxnOnDB(txn as ITxnData);
             }
-            catch(err){
-                console.log(hashArray[i], err.message); // return error hashs in response
-            }      
+            else{
+                this.saveOtherTxnOnDB(txn as IOtherTxnData);
+            }
         }
-        
-        return {"Total:": hashArray.length, dataArray};
+        //Add a return code
     }
 
     async getSingleTxnData(txnHash: string){
@@ -103,7 +76,10 @@ class UpdateBlockRoutine {
             }
         }
 
-        if(tokenAddress == ""){ throw new Error("Not a valid ERC-721 Token;") }
+        if(tokenAddress == ""){ 
+            let otherTxn: IOtherTxnData = { txn_hash: txnHash, token_address: null }
+            return (otherTxn);
+        }
         
         for(let i = 0; i < receipt.logs.length; i++){
             let log = receipt.logs[i];            
@@ -119,21 +95,45 @@ class UpdateBlockRoutine {
             }            
         }
 
-        if(tokenIdArray.length == 0){ throw new Error("Not a valid ERC-721 Token;") }
+        if(tokenIdArray.length == 0){ 
+            let otherTxn: IOtherTxnData = { txn_hash: txnHash, token_address: null }
+            return (otherTxn);
+        }
 
         let txn: ITxnData = 
         {
-            timestamp,
-            blockNumber: txnData.blockNumber,
-            hash: txnHash, 
-            tokenAddress,            
-            tokenId: JSON.stringify(tokenIdArray),
+            txn_timestamp: timestamp,
+            block_number: txnData.blockNumber,
+            txn_hash: txnHash, 
+            token_address: tokenAddress,
+            token_id: JSON.stringify(tokenIdArray),
             value            
         }
         
         return (txn);
     }
 
+    async saveOpenSeaTxnOnDB(txn: ITxnData){
+        const { txn_timestamp, block_number, txn_hash, token_address, token_id, value } = txn;
+        const txn_entity = this.openseaTxnRepository.create({ txn_timestamp, block_number, txn_hash, token_address, token_id, value });
+        await this.openseaTxnRepository.save(txn_entity);
+    }
+
+    async saveOtherTxnOnDB(txn: IOtherTxnData){
+        const { txn_hash } = txn;
+        const txn_entity = this.otherTxnRepository.create({ txn_hash });
+        await this.otherTxnRepository.save(txn_entity);
+    }
+
+    async getLastBlockOnChain(): Promise<number> {
+        const blockNumber = await this.web3.eth.getBlockNumber();    
+        return blockNumber;
+    }
+
+    async getLastBlockOnDB(): Promise<number> { 
+        const { block_number } = await this.openseaTxnRepository.findOne({ order: { block_number: "DESC" } });
+        return block_number;
+    }
 }
 
 export { UpdateBlockRoutine }

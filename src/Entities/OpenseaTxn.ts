@@ -23,7 +23,7 @@ class OpenseaTxn {
     token_id: string;
 
     @Column()
-    value: string;
+    value: number;
 
     constructor(){
         if(!this.id)

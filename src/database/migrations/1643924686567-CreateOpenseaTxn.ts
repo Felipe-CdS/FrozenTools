@@ -36,7 +36,7 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                     },
                     {
                         name: "value",
-                        type: "varchar"
+                        type: "real"
                     }
                 ]
             })
@@ -51,7 +51,7 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                     txn_hash: "",
                     token_address: "",
                     token_id: "",
-                    value: ""
+                    value: 0
                 }
             ]
         ).execute();

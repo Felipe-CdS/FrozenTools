@@ -4,7 +4,8 @@ import { router } from "./routes";
 
 import "./database";
 import { createConnection } from "typeorm";
-import { UpdateBlockRoutine } from "./UpdateBlockRoutine";
+import { UpdateBlockRoutine } from "./Services/UpdateBlockRoutine";
+import { UpdateRoutineFFW } from "./Services/UpdateRoutineFFW";
 
 config(); // Env vars setup
 
@@ -30,28 +31,8 @@ app.use(
 
 app.listen(3000, () => { console.log("Server Up!") });
 
-/*
-TESTING
-*/
-const updateBlockRoutine = new UpdateBlockRoutine();
-
-const updateDBToOnChainInfo = async() => {
-    var lastBlockOnChain = await updateBlockRoutine.getLastBlockOnChain();
-    var lastBlockOnDB = 14135713 //await updateBlockRoutine.getLastBlockOnDB() + 1;
-
-    while(lastBlockOnDB != lastBlockOnChain){
-        let timer = Date.now();
-        console.log(`> ${lastBlockOnDB} started...`);
-        await updateBlockRoutine.getSingleBlockDataFromOpenSea(lastBlockOnDB);
-        console.log(`> ${lastBlockOnDB} finished in ${(Date.now() - timer)/1000} seconds`);
-
-        var lastBlockOnChain = await updateBlockRoutine.getLastBlockOnChain();
-        lastBlockOnDB++;
-    }
-    setTimeout(updateDBToOnChainInfo, 1000);
-}
-
-updateDBToOnChainInfo();
+new UpdateRoutineFFW().updateRoutine(100000);
+//new UpdateBlockRoutine().updateRoutine();
 
 }).catch(error => console.log("Data Access Error : ", error));
 

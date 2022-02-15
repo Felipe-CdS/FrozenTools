@@ -4,7 +4,6 @@ import { router } from "./routes";
 
 import "./database";
 import { createConnection } from "typeorm";
-import { UpdateBlockRoutine } from "./Services/UpdateBlockRoutine";
 import { UpdateRoutineFFW } from "./Services/UpdateRoutineFFW";
 
 config(); // Env vars setup
@@ -31,7 +30,7 @@ app.use(
 
 app.listen(3000, () => { console.log("Server Up!") });
 
-new UpdateRoutineFFW().updateRoutine(100000);
+new UpdateRoutineFFW().updateRoutine(10000);
 //new UpdateBlockRoutine().updateRoutine();
 
 }).catch(error => console.log("Data Access Error : ", error));

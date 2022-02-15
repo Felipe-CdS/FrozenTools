@@ -1,8 +1,11 @@
 {
-    "type": "sqlite",
-    "database": "src/database/database.sqlite",
-    "migrations": ["src/database/migrations/*.ts"],
+    "type": "postgres",
+    "host": "localhost",
+    "port": "5432",
+    "username": "postgres",
+    "database": "FrozenTools",
     "entities": ["src/Entities/*.ts"],
+    "migrations": ["src/database/migrations/*.ts"],    
     "cli": {
         "migrationsDir": "src/database/migrations",
         "entitiesDir": "src/Entities"

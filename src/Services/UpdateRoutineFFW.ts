@@ -38,19 +38,16 @@ class UpdateRoutineFFW {
     }  
     
     public async updateRoutine(range: number) {
-        var lastBlockOnChain = await Web3MiscMethods.getLastBlockOnChain(this.web3);        
-        var lastBlockOnDB = await this.lastBlockLogRepository.getLastBlockOnDB();
-
-        while(lastBlockOnDB != lastBlockOnChain){
+        do{
             let timer = Date.now();
+            var lastBlockOnChain = await Web3MiscMethods.getLastBlockOnChain(this.web3);  
+            var lastBlockOnDB = await this.lastBlockLogRepository.getLastBlockOnDB();
+            
             console.log(`> ${lastBlockOnDB} to ${lastBlockOnDB+range} started...`);
             await this.getBlocksFromOpenSeaFFW(lastBlockOnDB, range);
-            console.log(`> finished in ${(Date.now() - timer)/1000} seconds`);
-    
-            var lastBlockOnChain = await Web3MiscMethods.getLastBlockOnChain(this.web3);  
-            lastBlockOnDB += range;
-        }
-        setTimeout(((range) => {this.updateRoutine(range)}), 1000);
+            console.log(`> finished in ${(Date.now() - timer)/1000} seconds`);            
+            
+        } while(lastBlockOnDB != lastBlockOnChain);
     }
 
     async getBlocksFromOpenSeaFFW(blockNumber: number, range: number) {
@@ -58,10 +55,15 @@ class UpdateRoutineFFW {
         let data: EventData[];
         let hashArray: {transactionHash: string , blockNumber: number}[];
 
-        data = await this.contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": (blockNumber + range) });
-        hashArray = data.map(obj =>  { return ({ transactionHash: obj.transactionHash, blockNumber: obj.blockNumber })});
+        do{
+            data = await this.contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": (blockNumber + range) });
+            hashArray = data.map(obj =>  { return ({ transactionHash: obj.transactionHash, blockNumber: obj.blockNumber })});
+            console.log(`>${hashArray.length} txns found`);
 
-        console.log(`>${hashArray.length} txns found`);
+            if(hashArray.length > 1000){
+                range /= 10;
+            }
+        } while(hashArray.length > 1000);
 
         for(let i = 0; i < hashArray.length; ++i){
             this.lastBlockLogRepository.setLastBlockOnDB(hashArray[i].blockNumber);
@@ -83,7 +85,7 @@ interface ITxnData {
     block_number: number;
     txn_hash: string;
     token_address: string;    
-    token_id: string;
+    token_id: string[];
     value: number;
 }
 

@@ -8,8 +8,8 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                 name: "openseatxn",
                 columns: [
                     {
-                        name: "id",
-                        type: "uuid",
+                        name:"id",
+                        type: "varchar",
                         isPrimary: true
                     },
                     {
@@ -20,17 +20,15 @@ export class CreateOpenseaTxn1643924686567 implements MigrationInterface {
                         name: "block_number",
                         type: "bigint"
                     },
-                    {
-                        name: "txn_hash",
-                        type: "varchar"
-                    },
+                    
                     {
                         name: "token_address",
                         type: "varchar"
                     },
                     {
                         name: "token_id",
-                        type: "varchar"
+                        type: "text",
+                        isArray: true
                     },
                     {
                         name: "value",

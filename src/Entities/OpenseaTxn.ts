@@ -1,34 +1,29 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { v4 as uuid } from "uuid";
 
+
+
 @Entity("openseatxn")
 class OpenseaTxn {
 
     @PrimaryColumn()
-    readonly id: string;
+    id: string; // ID => txn_hash
 
     @Column()
     txn_timestamp: string;
 
     @Column()
-    block_number: number;
-
-    @Column()
-    txn_hash: string;
+    block_number: number;   
 
     @Column()
     token_address: string;
 
-    @Column()
-    token_id: string;
+    @Column("text", { array: true })
+    token_id: string[];
 
     @Column()
     value: number;
 
-    constructor(){
-        if(!this.id)
-            this.id = uuid();
-    }
 }
 
 export { OpenseaTxn }

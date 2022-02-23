@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import { router } from "./routes";
 
@@ -6,7 +6,7 @@ import "./database";
 import { createConnection } from "typeorm";
 import { UpdateRoutineFFW } from "./Services/UpdateRoutineFFW";
 
-config(); // Env vars setup
+dotenv.config(); // Env vars setup
 
 createConnection().then(async connection => {
 
@@ -28,9 +28,9 @@ app.use(
     });
 });
 
-app.listen(3000, () => { console.log("Server Up!") });
+app.listen(process.env.PORT || 3000, () => { console.log("Server Up!") });
 
-new UpdateRoutineFFW().updateRoutine(10000);
+new UpdateRoutineFFW().updateRoutine(10);
 //new UpdateBlockRoutine().updateRoutine();
 
 }).catch(error => console.log("Data Access Error : ", error));

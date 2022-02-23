@@ -11,16 +11,7 @@ import {v4 as uuid } from "uuid";
 class OtherTxn {
     
     @PrimaryColumn()
-    readonly id: string;
-
-    @Column()
-    txn_hash: string;
-
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
-    }
+    id: string; // ID => txn_hash
 }
 
 export { OtherTxn }

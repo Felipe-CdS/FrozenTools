@@ -20,7 +20,8 @@ export class LastBlockLog1644952699781 implements MigrationInterface {
         const openseaTxnRepository = queryRunner.manager.getCustomRepository(LastBlockLogRepositories);
         await openseaTxnRepository.insert([
             {  
-                block_number: 5774644
+                // block_number: 5774644
+                block_number: 14135713 // Testing block
             }
         ]);
     }

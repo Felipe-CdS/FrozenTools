@@ -9,13 +9,9 @@ export class OtherTxn1644443330683 implements MigrationInterface {
                 name: "othertxn",
                 columns: [
                     {
-                        name: "id",
-                        type: "uuid",
+                        name:"id",
+                        type: "varchar",
                         isPrimary: true
-                    },
-                    {
-                        name:"txn_hash",
-                        type: "varchar"
                     }
                 ]
             }

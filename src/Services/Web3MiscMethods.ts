@@ -1,68 +1,88 @@
 import Web3 from "web3"
 import {  fromWei, sha3, hexToNumberString } from "web3-utils";
-import { BlockTransactionString, Transaction } from "web3-eth"
+import { Transaction, TransactionReceipt } from "web3-eth"
+import { Log } from "web3-core";
 
 class Web3MiscMethods{
 
-    static async getSingleTxnData(web3: Web3, txnHash: string){
+    static async getSingleTxnData(web3: Web3, txn_hash: string){
 
-        let tokenAddress: string, timestamp: string, value: number;
-        let tokenIdArray: string[] = [];
-    
-        let txnData: Transaction = null;        
-        let blockData: BlockTransactionString = null;
-        let receipt = await web3.eth.getTransactionReceipt(txnHash);  
-
-        txnData = await web3.eth.getTransaction(txnHash);
-        tokenAddress = "0x" + (txnData).input.slice(290,330);
-    
-        // Find address Loop
-        // for(let i = 0; i < receipt.logs.length; i++){
-        //     if(receipt.logs[i].topics[0] == sha3("Approval(address,address,uint256)")){
-        //         tokenAddress = receipt.logs[i].address.toLowerCase();
-        //         break;
-        //     }
-        // }       
-    
-        // if(tokenAddress == ""){ 
-        //     let otherTxn: IOtherTxnData = { txn_hash: txnHash, token_address: null }
-        //     return (otherTxn);
-        // }
+        let txnData: Transaction = null; 
+        let receipt: TransactionReceipt = null;
+        let txn: ITxnData = 
+            {
+                txn_hash,
+                timestamp: null,
+                block_number: null,            
+                token_address: null,    
+                token_id_array: null,
+                value: null,
+            };
         
-        for(let i = 0; i < receipt.logs.length; i++){
-            let log = receipt.logs[i];            
-            if(log.topics[0] == sha3("Transfer(address,address,uint256)")){
-                // Find Token ID's Loop
-                if(log.address.toLowerCase() == tokenAddress){
-                    tokenIdArray.push(hexToNumberString(log.topics[3]));
-                }
-                // Get value in bid auction wins
-                else{
-                    value = Math.max(value, parseFloat(fromWei(log.data)));
-                }
+        txnData             = await web3.eth.getTransaction(txn_hash);
+        receipt             = await web3.eth.getTransactionReceipt(txn_hash); 
+        
+        txn.txn_hash        = txn_hash;
+        txn.block_number    = txnData.blockNumber;
+        txn.token_address   = this.findContractAdress(txnData.input, receipt.logs);
+        txn.token_id_array  = this.findTokenIDs(txn.token_address, receipt.logs);        
+
+        if(!txn.token_id_array[0]){ 
+            let otherTxn: IOtherTxnData = { txn_hash, token_address: null };
+            return (otherTxn);
+        }
+        
+        txn.timestamp      = await web3.eth.getBlock(txnData.blockNumber).then((x) =>{ return x.timestamp.toString() });
+        txn.value          = this.getTxnValue(txn.token_address, receipt.logs, txnData);    
+
+        return (txn);
+    }
+
+    private static findContractAdress(txnInput: string, receiptLog: Log[]) {
+        let contractAddress: string = null;
+
+        for(let i = 0; i < receiptLog.length; i++){
+            if(receiptLog[i].topics[0] == sha3("Approval(address,address,uint256)")){
+                contractAddress = receiptLog[i].address.toLowerCase();
+                break;
             }
         }
 
-        if(tokenIdArray[0] == null){ 
-            let otherTxn: IOtherTxnData = { txn_hash: txnHash, token_address: null }
-            return (otherTxn);
+        if(contractAddress == null)
+            contractAddress = "0x" + txnInput.slice(290,330).toLowerCase();
+
+        return contractAddress;
+    }
+
+    private static findTokenIDs(contractAddress: string, receiptLog: Log[]) {
+        let tokenIdArray: string[] = [];
+
+        for(let i = 0; i < receiptLog.length; i++){
+            if(receiptLog[i].topics[0] == sha3("Transfer(address,address,uint256)")){
+                if(receiptLog[i].address.toLowerCase() == contractAddress)
+                    tokenIdArray.push(hexToNumberString(receiptLog[i].topics[3]));
+            }
         }
 
-        blockData = await web3.eth.getBlock(txnData.blockNumber);
-        timestamp = blockData.timestamp.toString(); 
-        value = parseFloat(fromWei(txnData.value));
-    
-        let txn: ITxnData = 
-        {
-            txn_timestamp: timestamp,
-            block_number: txnData.blockNumber,
-            txn_hash: txnHash, 
-            token_address: tokenAddress,
-            token_id: tokenIdArray,
-            value            
+        return tokenIdArray;
+    }
+
+    private static getTxnValue(contractAddress: string, receiptLog: Log[], txnData: Transaction) {
+        let value: number = null;
+
+        // Find value on bid auctions
+        for(let i = 0; i < receiptLog.length; i++){
+            if(receiptLog[i].topics[0] == sha3("Transfer(address,address,uint256)")){
+                if(receiptLog[i].address.toLowerCase() != contractAddress){                    
+                    value = Math.max(value, parseFloat(fromWei(receiptLog[i].data)));
+                }                   
+            }
         }
-        
-        return (txn);
+
+        if(!value)
+            value = parseFloat(fromWei(txnData.value)); // Find value on regular transactions
+
+        return value;
     }
     
     static async getLastBlockOnChain(web3: Web3): Promise<number> {
@@ -72,11 +92,11 @@ class Web3MiscMethods{
 }
 
 interface ITxnData {
-    txn_timestamp: string;
+    timestamp: string;
     block_number: number;
     txn_hash: string;
     token_address: string;    
-    token_id: string[];
+    token_id_array: string[];
     value: number;
 }
 

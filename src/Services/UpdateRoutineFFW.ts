@@ -75,17 +75,19 @@ class UpdateRoutineFFW {
             else{
                 this.otherTxnRepository.saveOtherTxnOnDB(txn as IOtherTxnData);
             }
+            process.stdout.write(".");
         }
+        console.log("");
         //Add a return code
     }
 }
 
 interface ITxnData {
-    txn_timestamp: string;
+    timestamp: string;
     block_number: number;
     txn_hash: string;
     token_address: string;    
-    token_id: string[];
+    token_id_array: string[];
     value: number;
 }
 

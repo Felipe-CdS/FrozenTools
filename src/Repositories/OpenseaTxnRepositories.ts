@@ -5,8 +5,8 @@ import { OpenseaTxn } from "../Entities/OpenseaTxn"
 class OpenseaTxnRepositories extends Repository<OpenseaTxn> { 
 
     async saveOpenSeaTxnOnDB(txn: ITxnData){
-        const { txn_timestamp, block_number, txn_hash, token_address, token_id, value } = txn;
-        const txn_entity = this.create({ id: txn_hash, txn_timestamp, block_number, token_address, token_id, value });
+        const { timestamp, block_number, txn_hash, token_address, token_id_array, value } = txn;
+        const txn_entity = this.create({ id: txn_hash, txn_timestamp: timestamp, block_number, token_address, token_id: token_id_array, value });
         
         try{           
             await this.save(txn_entity);
@@ -21,11 +21,11 @@ class OpenseaTxnRepositories extends Repository<OpenseaTxn> {
 }
 
 interface ITxnData {
-    txn_timestamp: string;
+    timestamp: string;
     block_number: number;
     txn_hash: string;
     token_address: string;    
-    token_id: string[];
+    token_id_array: string[];
     value: number;
 }
 

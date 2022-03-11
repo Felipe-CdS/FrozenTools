@@ -2,6 +2,8 @@ import Web3 from "web3"
 import {  fromWei, sha3, hexToNumberString } from "web3-utils";
 import { Transaction, TransactionReceipt } from "web3-eth"
 import { Log } from "web3-core";
+import { ITxnData } from "../Interfaces/ITxnData"
+import { IOtherTxnData } from "../Interfaces/IOtherTxnData"
 
 class Web3MiscMethods{
 
@@ -89,20 +91,6 @@ class Web3MiscMethods{
         const blockNumber = await web3.eth.getBlockNumber();
         return blockNumber;
     }
-}
-
-interface ITxnData {
-    timestamp: string;
-    block_number: number;
-    txn_hash: string;
-    token_address: string;    
-    token_id_array: string[];
-    value: number;
-}
-
-interface IOtherTxnData {
-    txn_hash: string;
-    token_address: null;
 }
 
 export { Web3MiscMethods }

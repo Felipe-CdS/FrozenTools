@@ -7,6 +7,8 @@ import { Web3MiscMethods } from "./Web3MiscMethods";
 import { LastBlockLogRepositories } from "../Repositories/LastBlockLogRepositories";
 import { OpenseaTxnRepositories } from "../Repositories/OpenseaTxnRepositories";
 import { OtherTxnRepositories } from "../Repositories/OtherTxnRepositories";
+import { ITxnData } from "../Interfaces/ITxnData";
+import { IOtherTxnData } from "../Interfaces/IOtherTxnData";
 
 /*
 *  ===============================================================
@@ -52,18 +54,20 @@ class UpdateRoutineFFW {
 
     async getBlocksFromOpenSeaFFW(blockNumber: number, range: number) {
 
-        let data: EventData[];
+        let data: EventData[] = null;
         let hashArray: {transactionHash: string , blockNumber: number}[];
 
-        do{
-            data = await this.contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": (blockNumber + range) });
-            hashArray = data.map(obj =>  { return ({ transactionHash: obj.transactionHash, blockNumber: obj.blockNumber })});
-            console.log(`>${hashArray.length} txns found`);
-
-            if(hashArray.length > 1000){
-                range /= 10;
+        while(data == null){
+            try{
+                data = await this.contract.getPastEvents("OrdersMatched", { "fromBlock": blockNumber, "toBlock": (blockNumber + range) });
             }
-        } while(hashArray.length > 1000);
+            catch(err){
+                data = null;
+            }
+        }            
+
+        hashArray = data.map(obj =>  { return ({ transactionHash: obj.transactionHash, blockNumber: obj.blockNumber })});
+        console.log(`>${hashArray.length} txns found`);
 
         for(let i = 0; i < hashArray.length; ++i){
             this.lastBlockLogRepository.setLastBlockOnDB(hashArray[i].blockNumber);
@@ -80,20 +84,6 @@ class UpdateRoutineFFW {
         console.log("");
         //Add a return code
     }
-}
-
-interface ITxnData {
-    timestamp: string;
-    block_number: number;
-    txn_hash: string;
-    token_address: string;    
-    token_id_array: string[];
-    value: number;
-}
-
-interface IOtherTxnData {
-    txn_hash: string;
-    token_address: null;
 }
 
 export { UpdateRoutineFFW }

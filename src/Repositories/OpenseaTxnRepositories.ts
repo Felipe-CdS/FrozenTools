@@ -1,5 +1,6 @@
 import { EntityRepository, Repository } from "typeorm"
 import { OpenseaTxn } from "../Entities/OpenseaTxn"
+import { ITxnData } from "../Interfaces/ITxnData"
 
 @EntityRepository(OpenseaTxn)
 class OpenseaTxnRepositories extends Repository<OpenseaTxn> { 
@@ -16,17 +17,7 @@ class OpenseaTxnRepositories extends Repository<OpenseaTxn> {
             console.log(txn_entity);
             throw new Error(err);
         }        
-    }
-    
-}
-
-interface ITxnData {
-    timestamp: string;
-    block_number: number;
-    txn_hash: string;
-    token_address: string;    
-    token_id_array: string[];
-    value: number;
+    }    
 }
 
 export { OpenseaTxnRepositories }

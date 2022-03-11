@@ -1,5 +1,6 @@
 import { EntityRepository, Repository } from "typeorm";
 import { OtherTxn } from "../Entities/OtherTxn";
+import { IOtherTxnData } from "../Interfaces/IOtherTxnData"
 
 @EntityRepository(OtherTxn)
 class OtherTxnRepositories extends Repository<OtherTxn> {
@@ -10,11 +11,6 @@ class OtherTxnRepositories extends Repository<OtherTxn> {
         await this.save(txn_entity);
         return txn_entity;
     }
-}
-
-interface IOtherTxnData {
-    txn_hash: string;
-    token_address: null;
 }
 
 export { OtherTxnRepositories }

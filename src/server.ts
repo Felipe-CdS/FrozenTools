@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { router } from "./routes";
 
 import "./database";
@@ -11,6 +12,7 @@ dotenv.config(); // Env vars setup
 createConnection().then(async connection => {
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 
@@ -30,8 +32,8 @@ app.use(
 
 app.listen(process.env.PORT || 3000, () => { console.log("Server Up!") });
 
-new UpdateRoutineFFW().updateRoutine(10);
-//new UpdateBlockRoutine().updateRoutine();
+// new UpdateRoutineFFW().updateRoutine(2000);
+// new UpdateBlockRoutine().updateRoutine();
 
 }).catch(error => console.log("Data Access Error : ", error));
 

@@ -11,7 +11,7 @@ const getAllContractTransactionsController = new GetAllContractTransactionsContr
 const router = Router();
 
 router.get("/txn/:txn_hash", testTxnController.handle);
-router.get("/checkdb", checkDBSavedController.handle);
-router.get("/contract-transactions", getAllContractTransactionsController.handle);
+router.get("/checkdb/:txn_hash", checkDBSavedController.handle);
+router.get("/contract-transactions/:contractAddress", getAllContractTransactionsController.handle);
 
 export { router }

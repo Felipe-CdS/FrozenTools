@@ -4,6 +4,8 @@ import { Transaction, TransactionReceipt } from "web3-eth"
 import { Log } from "web3-core";
 import { ITxnData } from "../Interfaces/ITxnData"
 import { IOtherTxnData } from "../Interfaces/IOtherTxnData"
+import { getCustomRepository } from "typeorm";
+import { OpenseaTxnRepositories } from "../Repositories/OpenseaTxnRepositories";
 
 class Web3MiscMethods{
 
@@ -90,6 +92,31 @@ class Web3MiscMethods{
     static async getLastBlockOnChain(web3: Web3): Promise<number> {
         const blockNumber = await web3.eth.getBlockNumber();
         return blockNumber;
+    }
+
+    // ATTENTION:
+    // This isn't a production method. However it can be useful in the future for debugging. 
+    // It is just used to update false 0 value txns saved before the getTxnValue() implementation.
+    // Even after this, there are still some 0 value txns. Maybe nft gifts (?)
+    static async findAndFixAllZeroValueTxn(web3: Web3){
+        const openseaTxnRepository = getCustomRepository(OpenseaTxnRepositories);
+        const zeroTxns = await openseaTxnRepository.find({ value: 0 });
+
+        for(let i = 0; i < zeroTxns.length; i++){
+
+            let txnData  = await web3.eth.getTransaction(zeroTxns[i].id);
+            let receipt  = await web3.eth.getTransactionReceipt(zeroTxns[i].id);
+            let newValue = Web3MiscMethods.getTxnValue(zeroTxns[i].token_address, receipt.logs, txnData);
+
+            await openseaTxnRepository.update(zeroTxns[i].id, { value: newValue });
+           
+            if(newValue == 0){
+                console.log(i, "/", zeroTxns.length, "||", zeroTxns[i].id + " still value 0");
+            }
+            else{
+                console.log(i, "/", zeroTxns.length, "||", "new value: ", newValue);
+            }
+        }
     }
 }
 

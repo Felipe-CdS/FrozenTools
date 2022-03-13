@@ -32,7 +32,7 @@ app.use(
 
 app.listen(process.env.PORT || 3000, () => { console.log("Server Up!") });
 
-// new UpdateRoutineFFW().updateRoutine(2000);
+new UpdateRoutineFFW().updateRoutine(2000);
 // new UpdateBlockRoutine().updateRoutine();
 
 }).catch(error => console.log("Data Access Error : ", error));

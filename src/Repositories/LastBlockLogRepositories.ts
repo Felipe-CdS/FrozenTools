@@ -9,10 +9,10 @@ class LastBlockLogRepositories extends Repository<LastBlock> {
         return Number(block_number);
     }
 
-    async setLastBlockOnDB(block_number: number): Promise<LastBlock> {
-        const newBlock = this.create({ block_number });
-        await this.save(newBlock);
-        return newBlock;
+    async setLastBlockOnDB(newBlock: number): Promise<LastBlock> {
+        const blockOnDB = await this.findOne({ order: { block_number: "DESC" } });
+        await this.update({ block_number: blockOnDB.block_number }, { block_number: newBlock });
+        return blockOnDB;
     }
 
  }

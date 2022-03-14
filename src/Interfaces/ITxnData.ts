@@ -1,5 +1,4 @@
 interface ITxnData {
-    timestamp: string;
     block_number: number;
     txn_hash: string;
     token_address: string;    

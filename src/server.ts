@@ -32,8 +32,8 @@ app.use(
 
 app.listen(process.env.PORT || 3000, () => { console.log("Server Up!") });
 
-new UpdateRoutineFFW().updateRoutine(2000);
-// new UpdateBlockRoutine().updateRoutine();
+// new UpdateRoutineFFW().updateRoutine(2000);
+// Web3MiscMethods.findAndFixAllNullNames();
 
 }).catch(error => console.log("Data Access Error : ", error));
 

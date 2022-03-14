@@ -10,7 +10,7 @@ class OpenseaTxn {
     id: string; // ID => txn_hash
 
     @Column()
-    txn_timestamp: string;
+    name: string;
 
     @Column()
     date: Date;

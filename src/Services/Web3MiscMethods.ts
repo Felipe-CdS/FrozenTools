@@ -1,11 +1,14 @@
 import Web3 from "web3"
+import axios from "axios";
 import {  fromWei, sha3, hexToNumberString } from "web3-utils";
 import { Transaction, TransactionReceipt } from "web3-eth"
 import { Log } from "web3-core";
 import { ITxnData } from "../Interfaces/ITxnData"
 import { IOtherTxnData } from "../Interfaces/IOtherTxnData"
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Not } from "typeorm";
 import { OpenseaTxnRepositories } from "../Repositories/OpenseaTxnRepositories";
+
+
 
 class Web3MiscMethods{
 
@@ -16,7 +19,6 @@ class Web3MiscMethods{
         let txn: ITxnData = 
             {
                 txn_hash,
-                timestamp: null,
                 block_number: null,            
                 token_address: null,    
                 token_id_array: null,
@@ -37,8 +39,7 @@ class Web3MiscMethods{
             return (otherTxn);
         }
         
-        txn.timestamp      = await web3.eth.getBlock(txnData.blockNumber).then((x) =>{ return x.timestamp.toString() });
-        txn.date           = new Date(parseInt(txn.timestamp) * 1000);
+        txn.date           = new Date();
         txn.value          = this.getTxnValue(txn.token_address, receipt.logs, txnData);    
 
         return (txn);

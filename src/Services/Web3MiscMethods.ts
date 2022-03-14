@@ -21,6 +21,7 @@ class Web3MiscMethods{
                 token_address: null,    
                 token_id_array: null,
                 value: null,
+                date: null
             };
         
         txnData             = await web3.eth.getTransaction(txn_hash);
@@ -37,6 +38,7 @@ class Web3MiscMethods{
         }
         
         txn.timestamp      = await web3.eth.getBlock(txnData.blockNumber).then((x) =>{ return x.timestamp.toString() });
+        txn.date           = new Date(parseInt(txn.timestamp) * 1000);
         txn.value          = this.getTxnValue(txn.token_address, receipt.logs, txnData);    
 
         return (txn);

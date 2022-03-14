@@ -13,6 +13,9 @@ class OpenseaTxn {
     txn_timestamp: string;
 
     @Column()
+    date: Date;
+
+    @Column()
     block_number: number;   
 
     @Column()

@@ -5,6 +5,7 @@ interface ITxnData {
     token_address: string;    
     token_id_array: string[];
     value: number;
+    date: Date;
 }
 
 export { ITxnData }

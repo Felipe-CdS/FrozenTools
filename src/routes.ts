@@ -1,20 +1,13 @@
 import { Router } from "express";
-import { TestTxnController } from "./Controllers/TestTxnController";
-import { CheckDBSavedController } from "./Controllers/CheckDBSavedController";
-import { GetAllContractTransactionsController } from "./Controllers/GetAllContractTransactionsController";
 import { AddNewCollectionController } from "./Controllers/AddNewCollectionController";
+import { GetCollectionByTokenAdressController } from "./Controllers/GetCollectionByTokenAdressController";
 
-
-const testTxnController = new TestTxnController();
-const checkDBSavedController = new CheckDBSavedController();
-const getAllContractTransactionsController = new GetAllContractTransactionsController();
 const addNewCollectionController = new AddNewCollectionController();
+const getByTokenAdressController = new GetCollectionByTokenAdressController();
 
 const router = Router();
 
-router.get("/txn/:txn_hash", testTxnController.handle);
-router.get("/checkdb/:txn_hash", checkDBSavedController.handle);
-router.get("/contract-transactions/:contractAddress", getAllContractTransactionsController.handle);
-router.get("/new-collection/:address", addNewCollectionController.handle);
+router.get("/collection/:token_address",        getByTokenAdressController.handle);
+router.get("/new-collection/:token_address",    addNewCollectionController.handle);
 
 export { router }

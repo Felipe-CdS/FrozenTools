@@ -1,15 +1,14 @@
 import { getCustomRepository } from "typeorm"
-import axios from "axios";
+import { CollectionRepositories } from "../Repositories/CollectionRepositories";
 import { TransactionRepositories } from "../Repositories/TransactionRepositories"
 
 
 class GetAllCollectionsService {
 
     async execute(){
-        const transactionRepository = getCustomRepository(TransactionRepositories);
-        const transactions = await transactionRepository.find();
-
-        return transactions;
+        const repository = getCustomRepository(CollectionRepositories);
+        const collections = await repository.find();
+        return collections;
     }
 }
 

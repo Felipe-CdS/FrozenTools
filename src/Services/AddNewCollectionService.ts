@@ -10,14 +10,19 @@ class AddNewCollectionService {
     async tryGetMoreOpenSeaInfo(address:string, name: string){
         let api_string = "https://api.opensea.io/api/v1/collection/" + name;
 
-        let response = await axios.get(api_string).then((resp) => resp.data.collection);
-        let response_token_address = (response.primary_asset_contracts[0].address).toLowerCase();
+        try{
+            let response = await axios.get(api_string).then((resp) => resp.data.collection);
+            let response_token_address = (response.primary_asset_contracts[0].address).toLowerCase();
 
-        if(response_token_address == address){
-            let { image_url, twitter_username, discord_url, opensea_slug } = response;
-            opensea_slug = response.slug;
-            return({ image_url, twitter_username, discord_url, opensea_slug });
+            if(response_token_address == address){
+                let { image_url, twitter_username, discord_url, opensea_slug } = response;
+                opensea_slug = response.slug;
+                return({ image_url, twitter_username, discord_url, opensea_slug });
+            }
         }
+        catch(err){
+            return(undefined);
+        }        
         return(undefined);
     }
 

@@ -5,7 +5,7 @@
     
     "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
     "rootDir": "./src",                                  /* Specify the root folder within your source files. */
-    "baseUrl": ".",                                  /* Specify the base directory to resolve non-relative module names. */
+    //"baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
     
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
 

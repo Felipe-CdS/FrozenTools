@@ -52,16 +52,7 @@ export class TransactionEntity1647628384373 implements MigrationInterface {
                 {
                     name: "block_number",
                     type: "integer"
-                },
-                {
-                    name: "name",
-                    type: "varchar"
-                },
-                {
-                    name: "symbol",
-                    type: "varchar",
-                    isNullable: true
-                },
+                }
             ]
         }));
     }

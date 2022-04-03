@@ -36,12 +36,6 @@ class Transaction {
     @Column()
     block_number: number; 
 
-    @Column()
-    name: string;
-
-    @Column()
-    symbol: string;
-
     constructor(){
         if(!this.id){
             this.id = uuid();
@@ -60,8 +54,6 @@ interface Itransaction {
     price: string;
     block_timestamp: Date;
     block_number: number;
-    name: string;
-    symbol: string;
 }
 
 export { Transaction, Itransaction }

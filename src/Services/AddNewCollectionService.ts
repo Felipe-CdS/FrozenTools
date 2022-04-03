@@ -15,9 +15,10 @@ class AddNewCollectionService {
             let response_token_address = (response.primary_asset_contracts[0].address).toLowerCase();
 
             if(response_token_address == address){
-                let { image_url, twitter_username, discord_url, opensea_slug } = response;
+                let { image_url, twitter_username, discord_url, opensea_slug, holders } = response;
                 opensea_slug = response.slug;
-                return({ image_url, twitter_username, discord_url, opensea_slug });
+                holders      = response.stats.num_owners;
+                return({ image_url, twitter_username, discord_url, opensea_slug, holders });
             }
         }
         catch(err){
@@ -26,17 +27,27 @@ class AddNewCollectionService {
         return(undefined);
     }
 
-    async getCollectionMetadata(address: string, collectionRepository:CollectionRepositories, Moralis){
+    async getCollectionMetadata(token_address: string, collectionRepository:CollectionRepositories, Moralis){
         let new_collection: ICollection;
-        const {token_address, name, symbol, contract_type } = await Moralis.Web3API.token.getNFTMetadata({ address });
-        const openSeaInfo = await this.tryGetMoreOpenSeaInfo(address, (name).toLowerCase());        
+
+        const { name, symbol, contract_type }   = await Moralis.Web3API.token.getNFTMetadata({ address: token_address });
+        const tokensTotalResp                   = await Moralis.Web3API.token.getAllTokenIds({ address: token_address, limit: 1 });
+        const openSeaInfo                       = await this.tryGetMoreOpenSeaInfo(token_address, (name).toLowerCase());    
+
+        new_collection = { 
+            token_address, 
+            name, symbol, 
+            contract_type, 
+            total_supply: tokensTotalResp.total,
+        };
 
         if(openSeaInfo != undefined){
-            let { image_url, twitter_username, discord_url, opensea_slug } = openSeaInfo;
-            new_collection = { token_address, name, symbol, contract_type, image_url, twitter_username, discord_url, opensea_slug };
-        }
-        else{
-            new_collection = { token_address, name, symbol, contract_type };
+            let { image_url, twitter_username, discord_url, opensea_slug, holders } = openSeaInfo;
+            new_collection.image_url        = image_url;
+            new_collection.twitter_username = twitter_username;
+            new_collection.discord_url      = discord_url;
+            new_collection.opensea_slug     = opensea_slug;
+            new_collection.holders          = holders;
         }
         
         await collectionRepository.save(collectionRepository.create(new_collection));
@@ -68,9 +79,7 @@ class AddNewCollectionService {
                     marketplace_address: (txnData.marketplace_address).toLowerCase(),
                     price: txnData.price,
                     block_timestamp: txnData.block_timestamp,
-                    block_number: txnData.block_number,
-                    name,
-                    symbol                   
+                    block_number: txnData.block_number                 
                 };
                 
                 try{
@@ -109,11 +118,9 @@ class AddNewCollectionService {
 
         if(check_duplicate == undefined){
             const data = await this.getCollectionMetadata(address, collectionRepository, Moralis);
-            await this.getAllTransactions(address, transactionRepository, Moralis);
-            return(data);
+            this.getAllTransactions(address, transactionRepository, Moralis);       
+            return(data);     
         }
-
-        return(undefined);
     }
 }
 

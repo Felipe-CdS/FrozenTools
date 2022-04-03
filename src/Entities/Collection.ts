@@ -31,7 +31,16 @@ class Collection {
 	opensea_slug: string;
 
 	@Column()
-	one_day_floor: string;
+	total_supply: string;
+
+	@Column()
+	holders: number;
+
+	@Column()
+	total_volume: number;
+
+	@Column()
+	floor_price: number;
 
     constructor(){
         if(!this.id){
@@ -49,7 +58,10 @@ interface ICollection {
 	twitter_username?: string;
 	discord_url?: string;
 	opensea_slug?: string;
-	one_day_floor?: string;
+	total_supply?: string;
+	holders?: number;
+	total_volume?: number;
+	floor_price?: number;
 }
 
 export { Collection, ICollection }

@@ -48,8 +48,23 @@ export class Collections1648908933817 implements MigrationInterface {
                     isNullable: true
                 },
                 {
-                    name: "one_day_floor",
+                    name: "total_supply",
                     type: "varchar",
+                    isNullable: true
+                },
+                {
+                    name: "holders",
+                    type: "integer",
+                    isNullable: true
+                },
+                {
+                    name: "total_volume",
+                    type: "double precision",
+                    isNullable: true
+                },
+                {
+                    name: "floor_price",
+                    type: "double precision",
                     isNullable: true
                 },
             ]
